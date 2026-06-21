@@ -41,6 +41,14 @@ build/Release
 
 # Dependency directories
 node_modules/
+.venv/
+*.egg-info/
+__pycache__/
+*.pyc
+build/
+dist/
+pip-social-analyzer/
+social-analyzer-main.zip
 jspm_packages/
 
 # Snowpack dependency directory (https://snowpack.dev/)

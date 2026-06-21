@@ -1,10 +1,15 @@
-FROM node:18.15.0-alpine3.17
+FROM node:24-alpine
+
 WORKDIR /usr/src/app
+
+COPY package*.json ./
+RUN npm ci --omit=dev
+
 COPY . .
-RUN apk update && \
-  apk add --no-cache firefox-esr && \
-  npm ci && \
-  npm install lodash && \
-  npm install --loglevel=error
+RUN apk add --no-cache firefox-esr
+
 EXPOSE 9005
-ENTRYPOINT [ "npm", "start", "--","--docker"]
+
+USER node
+
+ENTRYPOINT ["npm", "start", "--", "--docker"]

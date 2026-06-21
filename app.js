@@ -66,7 +66,7 @@ if (argv.output !== 'json') {
 
 import semver from 'semver'
 
-if (semver.satisfies(process.version, '>13 || <13')) {
+if (semver.satisfies(process.version, '>=14')) {
   if (argv.output !== 'json') {
     console.log('[init] NodeJS Version Check')
   }

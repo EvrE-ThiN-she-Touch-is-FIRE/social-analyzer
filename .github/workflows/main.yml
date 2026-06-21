@@ -1,15 +1,60 @@
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
-name: publish 
-on: [push]
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Check Node syntax
+        run: |
+          node --check app.js
+          for f in modules/*.js; do node --check "$f"; done
+
+      - name: Smoke test Node CLI
+        run: node app.js --help
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python package
+        run: pip install -e .
+
+      - name: Smoke test Python CLI
+        run: python -m social-analyzer --list
+
+      - name: Run shell test
+        run: bash test/test.sh
+
+  publish:
+    if: github.repository == 'qeeqbox/social-analyzer'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
       - name: install requirements
-        run: sudo apt-get install curl
+        run: sudo apt-get install -y curl
       - name: build and run
         run: |
           curl https://raw.githubusercontent.com/qeeqbox/global-scripts/main/auto-checking.sh > auto-checking.sh
@@ -21,7 +66,7 @@ jobs:
           git config user.name "qb-auto"
           git config user.email "qbactions@gmail.com"
           git add -- . :!auto-checking.sh
-          git commit -m "🤖"
+          git commit -m "🤖" || exit 0
           git push
       - name: delete auto-checking.sh
         if: always()
